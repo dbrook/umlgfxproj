@@ -1,0 +1,128 @@
+Computer Graphics 1 Lighting Project (91.427)
+=============================================
+
+Project Group Name: The Red Menace 
+
+Members:
+	Dan Brook
+	Austin Veino
+	Dan Scanlan
+	
+----------------------
+ Project Introduction
+----------------------
+This project (at this stage) is based off of a Qt OpenGL test interface.
+The window that spawns at run-time is dominated (size-wise) with an OpenGL
+frame buffer (a Qt widget that partially mimics GLUT functions). The mouse
+can be used to click and drag within the scene to change its rotation, and
+the sliders to the right use "signals" from the window to reflect the 
+current value of the rotation parameters. 
+
+Because this assignment is to focus mostly on lighting, there are three
+toggle buttons to turn on and off each light source. There is a light 
+source that comes from above and mimics overhead lights in a room, then a
+light source that comes from the right, and one that has the OPPOSITE
+colors (compared to the one on the right) on the left. For example, if
+you add more red with the slider, it will be taken from the left and 
+given to the right. 
+
+
+---------------------------------------------------------
+ A quick summary of the ins-and-outs of the Qt Framework
+---------------------------------------------------------
+Qt is a C++ based widget and application framework for designing cross-
+platform GUIs. If you have used VLC then you've used Qt.
+
+The chief advantages of Qt are its open source licensing, cross-platform
+building and runtime environments, widget styling that matches that of
+the targeted build system, and a robust system of event handling known 
+as signals and slots, which allow multiple-path communication between 
+objects and their controllers.
+
+Now where does OpenGL (this is a graphics project after all) fit in here?
+Qt provides a widget called QGLWidget, which is essentially its very own
+OpenGL frame buffer that can be embedded into a graphical application. 
+What's great about this is that anything involving menus, controls, or
+other text in a pure-OpenGL system is far too difficult by itself, but
+by using a framework under which the frame buffer will sit, we can (in
+theory) build a more interesting/robust application. Additionally, 
+starting from scratch using an entirely different approach than the Angel
+code does will make using C++ and its actual object-oriented approach a
+little more sane and easier to code under source control like GitHub.
+
+
+----------------------------------------------
+ Some broad project goals (by no means rigid)
+----------------------------------------------
+Implementing [some of] the following ideas are possibly within our grasp!
+
+ - Still use the keyboard to move:
+      Up, down, left, right, backwards, forwards
+      
+ - Use the mouse to change looking direction (up/down, left/right)
+
+ - Add two sets of controls for additional light source(s)
+
+ - Have the application take an argument / any file and load it up into
+    the frame buffer using "assimp" (The Open Asset Import Library) which 
+    will have the ability to ingest these formats (some possibilities)
+      + Blender 3D files (.blend)
+      + 3ds Max 3DS (.3ds)
+      + ... and TONS more.
+
+ - Lastly, Qt can handle network transport (like HTTP), so maybe add a 
+    way to load a model from a user-provided URL? If the loading of 
+    user-supplied local models, this should actually be a breeze to do.
+    
+
+------------------------
+ Getting up and running
+------------------------
+Find your distribution's installer at qt-project.org. If you're using
+Linux, simply installing the Qt development libraries from your
+system's package manager should pull in all the runtime dependencies as
+well and allow you to build the project. To check if they're installed
+a simple "which qmake" should return "/usr/bin/qmake" or something 
+similar.
+
+On Windows, installing MinGW with C++ and then installing Qt for MinGW
+is the easiest way to go. The process is almost fully automatic, but
+misses one very important thing; setting the environment variables is
+not done by the installer. Once the paths for qt\bin and mingw\bin are
+placed in the user's path, the project can then be compiled from this
+source very easily.
+
+On the Mac, well ... it SHOULD have been as simple as getting the 
+.dmg installer from qt-project.org but we've had a couple of issues
+after running "qmake" of unresolved system paths which haven't made
+sense so far. 
+
+
+-----------------------
+ Building from scratch
+-----------------------
+Upon the initial grabbing of the sources from the repository you will
+need to run 'qmake' from the project directory itself. The qmake will
+parse the .pro file as well as the target system's build parameters to
+create a makefile that resolves all the includes and other system-
+specific details so building a binary/executable for your system is
+then just a simple matter of running 'make'.
+
+There are a few different make targets to take note of, but we won't
+really be concerned with them except for making a "release-able" 
+Windows .exe file (dynamically-linked against the non-debug libraries.
+
+   make clean     - cleans the source directory of object and other
+                      temporary build files
+                      
+   make           - will produce the default/incremental build
+                      (which is going to be "debug")
+                      
+   make debug     - builds and dynamically-links against the debug
+                      versions of the Qt libraries
+                      (runs when you just type "make")
+                      
+   make release   - builds and dynamically-links against normal
+                      libraries that are suitable for distribution.
+
+ 
