@@ -1,0 +1,7 @@
+# Ignore compiles object files
+*.o
+
+# Ignore any qmake/Eclipse OS-dependent oddities
+.cproject
+.project
+finalproject.pro.user

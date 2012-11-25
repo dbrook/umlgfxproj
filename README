@@ -125,4 +125,13 @@ Windows .exe file (dynamically-linked against the non-debug libraries.
    make release   - builds and dynamically-links against normal
                       libraries that are suitable for distribution.
 
- 
+
+------------------
+ GitHub and stuff
+------------------
+I won't lie, GitHub is still a bit of a mystery (given my account 
+was created, well, just now). As such, I just ask that group members
+please be careful in what they commit. I've setup rules to ignore
+any compiler temporaries / object files so that when you commit
+you shouldn't have to do a "make clean" first, but who really knows
+what will happen.
