@@ -1,7 +1,10 @@
-# Ignore compiles object files
+# Ignore compiled object files
 *.o
 
 # Ignore any qmake/Eclipse OS-dependent oddities
 .cproject
 .project
 finalproject.pro.user
+Makefile
+Makefile.release
+Makefile.debug
