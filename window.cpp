@@ -199,7 +199,12 @@ QSlider *Window::createSlider()
 QSlider *Window::unitSlider( void )
 {
         QSlider *slider = new QSlider( Qt::Horizontal );
-        slider->setRange( 1, 500 );
+
+        // Things go REALLY weird if these sliders are allowed
+        // to span the full range of RGB color values as processed
+        // within GLWidget::aux[colorName], so make sure the sliders
+        // don't allow it to happen.
+        slider->setRange( 1, 499 );
         slider->setSingleStep( 5 );
         slider->setPageStep( 10 );
         slider->setTickInterval( 50 );
