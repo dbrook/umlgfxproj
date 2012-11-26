@@ -4,19 +4,16 @@
  * This file is a combination of original work and a template
  * provided from the Qt project maintainers. The project page
  * can be found here:
- *  http://doc.qt.digia.com/qt/opengl-hellogl-glwidget-cpp.html
+ *  http://doc.qt.digia.com/qt/opengl-hellogl.html
+ * 
+ * See LICENSE for details
  *
+ * File Description:
  * This file contains (most importantly) the redefined member
  * functions to actually construct an OpenGL scene as well as
  * other Qt-specific bindings for the widget itself.
  */
 
-/* LICENSE INFORMATION
-   File has been considerably modified from its source author:
-   Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
-
-   Original License: BSD
- */
 
 #include <QtGui>      // Pull in the actual interface to the GUI elems
 #include <QtOpenGL>   // Pull in the Qt-abstracted OpenGL interface

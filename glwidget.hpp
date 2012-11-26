@@ -4,25 +4,22 @@
  * This file is a combination of original work and a template
  * provided from the Qt project maintainers. The project page
  * can be found here:
- *  http://doc.qt.digia.com/qt/opengl-hellogl-glwidget-h.html
+ *  http://doc.qt.digia.com/qt/opengl-hellogl.html
+ * 
+ * See LICENSE for details
  *
+ * File Description:
  * Header file showing interfaces available to the actual widget
  * that will hold all of the OpenGL goodies.
  */
 
-/* LICENSE INFORMATION
-   File has been considerably modified from its source author:
-   Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
-
-   Original License: BSD
- */
 
 #ifndef _GLWIDGET_H
 #define _GLWIDGET_H
 
 #include <QGLWidget>   // The OpenGL "canvas" of sorts
 class QtLogo;
-// We'll use this for dummy test data for now!
+// We'll use this for dummy test data for now
 
 /*
  * The window we create publically-inherits from the far-reaching

@@ -4,21 +4,17 @@
  * This file is a combination of original work and a template
  * provided from the Qt project maintainers. The project page
  * can be found here:
- *  http://doc.qt.digia.com/qt/opengl-hellogl-window-cpp.html
+ *  http://doc.qt.digia.com/qt/opengl-hellogl.html
+ * 
+ * See LICENSE for details
  *
+ * File Description:
  * Code to connect signals/slots in the main window's GUI as well
  * as setup the widget layout of said main window.
  */
 
-/* LICENSE INFORMATION
-   File has been considerably modified from its source author:
-   Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).
-
-   Original License: BSD
- */
 
 #include <QtGui>
-
 #include "glwidget.hpp"   // Local project include
 #include "window.hpp"     // Local project include
 

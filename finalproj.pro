@@ -1,7 +1,9 @@
-HEADERS      = glwidget.hpp \
+HEADERS      = asset.hpp\
+               glwidget.hpp \
                window.hpp \
                qtlogo.hpp
-SOURCES      = glwidget.cpp \
+SOURCES      = asset.cpp\
+               glwidget.cpp \
                main.cpp \
                window.cpp \
                qtlogo.cpp
