@@ -1,0 +1,11 @@
+---------------------
+ License Information
+---------------------
+Portions of this code come courtesy of the Nokia Corporation, who provided
+the initial codebase for the user interface and how to link in and mutate an
+OpenGL frame buffer. The original sample code can be found here:
+
+  http://doc.qt.digia.com/qt/opengl-hellogl.html
+
+The sample code's source was published under a BSD license, so as a result,
+this project's code is as well.
