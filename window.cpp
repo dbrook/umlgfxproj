@@ -199,10 +199,10 @@ QSlider *Window::createSlider()
 QSlider *Window::unitSlider( void )
 {
         QSlider *slider = new QSlider( Qt::Horizontal );
-        slider->setRange( 1, 100 );
+        slider->setRange( 1, 500 );
         slider->setSingleStep( 5 );
         slider->setPageStep( 10 );
-        slider->setTickInterval( 10 );
+        slider->setTickInterval( 50 );
         slider->setTickPosition( QSlider::TicksAbove );
         return slider;
 }

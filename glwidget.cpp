@@ -234,7 +234,7 @@ void GLWidget::auxRed( int userRed )
 {
         auxR = userRed;
         auxColor[0] = (float) auxR / 100.0;
-        axxColor[0] = (float) ((auxR - 100.0) * -1) / 100.0;
+        axxColor[0] = (float) ((auxR - 500.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -242,7 +242,7 @@ void GLWidget::auxGreen( int userGreen )
 {
         auxG = userGreen;
         auxColor[1] = (float) auxG / 100.0;
-        axxColor[1] = (float) ((auxG - 100.0) * -1) / 100.0;
+        axxColor[1] = (float) ((auxG - 500.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -250,7 +250,7 @@ void GLWidget::auxBlue( int userBlue )
 {
         auxB = userBlue;
         auxColor[2] = (float) auxB / 100.0;
-        axxColor[2] = (float) ((auxB - 100.0) * -1) / 100.0;
+        axxColor[2] = (float) ((auxB - 500.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -258,7 +258,7 @@ void GLWidget::auxAlpha( int userAlpha )
 {
         auxA = userAlpha;
         auxColor[3] = (float) auxA / 100.0;
-        axxColor[3] = (float) (auxA - 100.0) * -1;
+        axxColor[3] = (float) (auxA - 500.0) * -1;
         updateGL();
 }
 
