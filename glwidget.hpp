@@ -86,7 +86,13 @@ public slots:
         void auxGreen ( int userGreen );
         void auxBlue  ( int userBlue );
         void auxAlpha ( int userAlpha );
-
+        
+        /* 
+         * Slots to change the projection mode
+         */
+        void p_Perspective( );
+        void p_Orthographic( );
+        
 signals:
         /*
          * These signals get emitted so the GUI widgets can reflect
@@ -157,6 +163,8 @@ private:
          */
         int auxR, auxG, auxB, auxA;
         GLfloat auxColor[4], axxColor[4];
+        
+        bool perspectiveMode;
 };
 
 #endif    //_GLWIDGET_H

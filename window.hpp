@@ -25,6 +25,7 @@
 class QSlider;
 class GLWidget;
 class QPushButton;
+class QRadioButton;
 
 /*
  * The window we create publicly-inherits from the far-reaching
@@ -57,6 +58,7 @@ private:
         QPushButton *auxiliarySwitch;
         QPushButton *oppositeSwitch;
         QSlider *redSlider, *grnSlider, *bluSlider, *alpSlider;
+        QRadioButton *p_orth, *p_pers;
 };
 
 #endif    //_WINDOW_H

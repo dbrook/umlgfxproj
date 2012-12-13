@@ -26,11 +26,47 @@ Window::Window()
         // Construct an instance of the main window.
         glWidget = new GLWidget;
 
-        // Place and initialize the delicious GUI elements
+        /*
+         * Two direct layouts will be present, the first is OpenGL,
+         * and the second is just a vertical bar of all other controls.
+         * The controls SHOULD NOT stretch as the window is resized, but
+         * the OpenGL widget is allowed to.
+         */
+        QHBoxLayout *mainLayout = new QHBoxLayout;
+        mainLayout->addWidget( glWidget );
+        QVBoxLayout *mainControls = new QVBoxLayout;
+        mainControls->setAlignment( Qt::AlignTop );
+        mainLayout->addLayout( mainControls );
+
+        /*
+         * Scene rotation controls can now be added as children
+         */
+        QGroupBox *scRotation = new QGroupBox( "Scene Rotation" );
+        scRotation->setAlignment( Qt::AlignHCenter );
+        mainControls->addWidget( scRotation );
+
+        // Helper function assists in making consistent sliders
         xSlider = createSlider();
         ySlider = createSlider();
         zSlider = createSlider();
 
+        // Labels will help the user see what is being changed
+        QLabel *xRotLabel = new QLabel( "Around X Axis" );
+        QLabel *yRotLabel = new QLabel( "Around Y Axis" );
+        QLabel *zRotLabel = new QLabel( "Around Z Axis" );
+
+        // Populate the rotation controllers. Within EACH AND EVERY 
+        // QGroupBox we need another layout. The LAYOUT is the actual
+        // parent to all widgets within. This makes life a bit easier.
+        QVBoxLayout *rotLayout = new QVBoxLayout;
+        scRotation->setLayout( rotLayout );
+        rotLayout->addWidget( xRotLabel );
+        rotLayout->addWidget( xSlider );
+        rotLayout->addWidget( yRotLabel );
+        rotLayout->addWidget( ySlider );
+        rotLayout->addWidget( zRotLabel );
+        rotLayout->addWidget( zSlider );
+        
         /*
          * Interconnect the changes of the sliders to our GLWidget
          * 
@@ -59,37 +95,29 @@ Window::Window()
         connect( glWidget, SIGNAL(zRotationChanged(int)),
                         zSlider, SLOT(setValue(int)) );
 
-        // Labels will help the user see what is being changed
-        QLabel *xRotLabel = new QLabel( "Around X Axis" );
-        QLabel *yRotLabel = new QLabel( "Around Y Axis" );
-        QLabel *zRotLabel = new QLabel( "Around Z Axis" );
-
-        // Place a couple of main layouts (GL frame buffer, control area)
-        QHBoxLayout *mainLayout = new QHBoxLayout;
-        mainLayout->addWidget( glWidget );
-
-        // Make a group area for the rotation functions
-        QVBoxLayout *mainControls = new QVBoxLayout;
-
-        // (make the controls not span vertically)
-        mainControls->setAlignment( Qt::AlignTop );
-
-        mainLayout->addLayout( mainControls );
-        QGroupBox *scRotation = new QGroupBox( "Scene Rotation" );
-        scRotation->setAlignment( Qt::AlignHCenter );
-        mainControls->addWidget( scRotation );
-
-        // Populate the rotation controllers
-        QVBoxLayout *rotLayout = new QVBoxLayout;
-        scRotation->setLayout( rotLayout );       // Need to make a layout WITHIN the groupbox
-
-        rotLayout->addWidget( xRotLabel );
-        rotLayout->addWidget( xSlider );
-        rotLayout->addWidget( yRotLabel );
-        rotLayout->addWidget( ySlider );
-        rotLayout->addWidget( zRotLabel );
-        rotLayout->addWidget( zSlider );
-
+        /*
+         * NEW FEATURE!
+         * A new group to handle different perspective modes
+         */
+        QGroupBox *projections = new QGroupBox( "Projection Mode" );
+        projections->setAlignment( Qt::AlignHCenter );
+        mainControls->addWidget( projections );
+        QVBoxLayout *projLayout = new QVBoxLayout;
+        projections->setLayout( projLayout );
+        
+        p_pers = new QRadioButton( "Perspective" );
+        p_orth = new QRadioButton( "Orthographic" );
+        projLayout->addWidget( p_pers );
+        projLayout->addWidget( p_orth );
+        
+        // Connect to the right slots
+        connect( p_pers, SIGNAL(clicked()),
+                 glWidget, SLOT(p_Perspective()) );
+        connect( p_orth, SIGNAL(clicked()),
+                 glWidget, SLOT(p_Orthographic()) );
+        
+        // Make sure the perspective mode is checked
+        p_pers->setChecked( true );
 
         /*
          * Now set up a group box for handling all the lighting needs
@@ -101,19 +129,19 @@ Window::Window()
         scLighting->setLayout( lightingLayout );
 
         // Room light toggle operation
-        roomLightSwitch = new QPushButton( "Room Light Master" );
+        roomLightSwitch = new QPushButton( "Room Light" );
         lightingLayout->addWidget( roomLightSwitch );
         connect( roomLightSwitch, SIGNAL(clicked()),
                         glWidget, SLOT(lightAmbientToggle(void)) );
 
         // Right hand supplemental light toggle
-        auxiliarySwitch = new QPushButton( "Right Light Master" );
+        auxiliarySwitch = new QPushButton( "Right Light" );
         lightingLayout->addWidget( auxiliarySwitch );
         connect( auxiliarySwitch, SIGNAL(clicked()),
                         glWidget, SLOT(auxLightToggle(void)) );
 
         // Left hand opposite light toggle
-        oppositeSwitch = new QPushButton( "Left Light Master" );
+        oppositeSwitch = new QPushButton( "Left Light" );
         lightingLayout->addWidget( oppositeSwitch );
         connect( oppositeSwitch, SIGNAL(clicked()),
                         glWidget, SLOT(oppositeLightToggle(void)) );
@@ -124,10 +152,10 @@ Window::Window()
         QLabel *grnLabel = new QLabel( "Green" );
         QLabel *bluLabel = new QLabel( "Blue" );
 
+        // used another helper function here to make these sliders easier
         redSlider = unitSlider();
         bluSlider = unitSlider();
         grnSlider = unitSlider();
-        alpSlider = unitSlider();
 
         lightingLayout->addWidget( redLabel );
         lightingLayout->addWidget( redSlider );
@@ -142,28 +170,34 @@ Window::Window()
                  glWidget,   SLOT(auxGreen(int)) );
         connect( bluSlider,  SIGNAL(valueChanged(int)),
                  glWidget,   SLOT(auxBlue(int)) );
-        connect( alpSlider,  SIGNAL(valueChanged(int)),
-                 glWidget,   SLOT(auxAlpha(int)) );
 
-
-        // VERY IMPORTANT: Make it so only the GL frame buffer expands
-        // (the layout will NOT scale in a visually appealing way
-        // if this is not set this way).
+        /*
+         * VERY IMPORTANT: 
+         * Make it so only the GL frame buffer expands (the layout will NOT
+         * scale in a visually appealing way if this is not set this way).
+         */
         mainLayout->setStretch( 0, 1 );
 
         setLayout( mainLayout );            // Commit the layout of widgets
 
-        // Initialize values of the sliders
-        ////// NOTE:: This will override the initialize GL camera setting /////
+        /*
+         * Initialize values of the sliders
+         * VERY IMPORTANT! This will override whatever the glwidget has in
+         * its constructor for initial parameters because the act of doing
+         * a setValue() on them sends a signal to the glwidget as a result
+         * of the connect() earlier. 
+         * There's also no error checking implemented in the sliders so
+         * do NOT set them out of bounds in the unitSlider() helper function.
+         */
         xSlider->setValue( 30 * 16 );
         ySlider->setValue( 345 * 16 );
         zSlider->setValue( 345 * 16 );
-        redSlider->setValue( 100 );
+        redSlider->setValue( 200 );
         grnSlider->setValue(  10 );
         bluSlider->setValue(  10 );
 
         // Give the main window a helpful but simple title
-        setWindowTitle( tr( "Qt/OpenGL Multiple Light Source Test Interface" ) );
+        setWindowTitle( tr( "Qt/OpenGL Final Project" ) );
 }
 
 /* 

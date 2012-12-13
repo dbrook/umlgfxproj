@@ -20,7 +20,11 @@
 #include <math.h>     // As with any good OpenGL program, there's a 
                       // healthy amount of under-the-hood mathematics!
 
-
+// [Degrees] to Radians helper function
+static float toRadians( float degrees )
+{
+        return degrees * (M_PI / 180.0);
+}
 
 // Project local includes
 #include "glwidget.hpp" // grab our GLWidget class
@@ -63,6 +67,9 @@ GLWidget::GLWidget( QWidget *parent ) :
 
         // The starting values for the variable color light
         auxR = auxG = auxB = auxA = 0;
+        
+        // Make the default on instantiation be perspective projection
+        perspectiveMode = true;
 }
 
 /*
@@ -211,7 +218,7 @@ void GLWidget::auxLightToggle( void )
                 glEnable( GL_LIGHT1 );
                 flashlightOn = true;
         }
-        updateGL();                // Commit the change to the scene
+        updateGL();                // Force the change to the scene
 }
 
 void GLWidget::oppositeLightToggle( void )
@@ -262,6 +269,31 @@ void GLWidget::auxAlpha( int userAlpha )
         updateGL();
 }
 
+/* 
+ * Turn on perspective projection (this uses predefined stuff in the
+ * resize protected function to work ... static stuff)
+ */
+void GLWidget::p_Perspective( void )
+{
+        perspectiveMode = true;
+        
+        // Evil way of forcing the redraw to happen
+        resizeGL( this->width(), this->height() );
+        updateGL();
+}
+
+/* 
+ * Similar to the above function, but for orthographic projection
+ */
+void GLWidget::p_Orthographic( void )
+{
+        perspectiveMode = false;
+
+        // Evil way of forcing the redraw to happen
+        resizeGL( this->width(), this->height() );
+        updateGL();
+}
+
 
 /*
  * These functions will closely mimic those which we've seen already
@@ -277,8 +309,6 @@ void GLWidget::initializeGL()
         // Make a QtLogo (this has been provided to us), (make it green!)
         logo = new QtLogo( this, 64 );
         logo->setColor( qtPurple.dark() );
-
-//        glutSolidTeapot( 2.0 );
 
         glEnable( GL_DEPTH_TEST );
         glEnable( GL_CULL_FACE );
@@ -321,12 +351,12 @@ void GLWidget::paintGL()
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glLoadIdentity();
 
-        glTranslatef( 0.0, 0.0, -10.0 );        // Need -10 to be visible!
+        glTranslatef( 0.0, 0.0, -0.75 );        // Need -10 to be visible!
         glRotatef( xRot / 16.0, 1.0, 0.0, 0.0 );
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
 
-        glTranslatef( -xPos, -yPos, -zPos );
+//        glTranslatef( -xPos, -yPos, -zPos );
 
         glLightfv( GL_LIGHT1, GL_DIFFUSE, auxColor );
         glLightfv( GL_LIGHT2, GL_DIFFUSE, axxColor );
@@ -345,20 +375,48 @@ void GLWidget::resizeGL( int width, int height )
 {
         int side = qMin( width, height );
 
-        // Ugh. gotta remember to make sure I'm spelling things right.
-        // "side" != "size"
         // Setting up the viewport
         glViewport( (width - side) / 2, (height - side) / 2, side, side );
 
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
 
-        // Seems this does some Qt-system-specific checks first.
+        /*
+         * For perspective projection, since we aren't using GLUT, we need
+         * to do a conversion.  
+         * 
+         * This site helped:
+         
+        http://jleland.blogspot.com/2008/12/gluperspective-to-glfrustrumf.html
+
+        */
+        GLfloat top, bottom, left, right;
+        GLfloat fov = 40, near = 0.2, far = 15.0;
+        
+        if (perspectiveMode) {
+//                GLfloat aspect = (GLfloat) width / (GLfloat) height;
+                // Always make aspect ratio 0 to avoid nasty looking resizes
+                GLfloat aspect = 1.0;
+                top = tan( toRadians( fov ) ) * near;
+                bottom = -top;
+                left = aspect * bottom;
+                right = aspect * top;
+                
+                // See if we're running OpenGL ES and use the proper function
 #ifdef QT_OPENGL_ES_1
-        glOrthof( -0.5, +0.5, -0.5, +0.5, 4.0, 15.0 );
+                glFrustumf( left, right, bottom, top, near, far );
 #else
-        glOrtho( -0.5, +0.5, -0.5, +0.5, 4.0, 15.0 );
+                glFrustum( left, right, bottom, top, near, far );
 #endif
+                
+        } else {
+                // See if we're running OpenGL ES and use the proper function
+#ifdef QT_OPENGL_ES_1
+                glOrthof( -0.6, 0.6, -0.6, 0.6, near, far );
+#else
+                glOrtho( -0.6, 0.6, -0.6, 0.6, near, far );
+#endif
+        }
         glMatrixMode( GL_MODELVIEW );
 }
 

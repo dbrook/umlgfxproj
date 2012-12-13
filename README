@@ -1,5 +1,5 @@
-Computer Graphics 1 Lighting Project (91.427)
-=============================================
+Computer Graphics Final Assignment (91.427)
+===========================================
 
 Project Group Name: The Red Menace 
 
@@ -18,13 +18,10 @@ can be used to click and drag within the scene to change its rotation, and
 the sliders to the right use "signals" from the window to reflect the 
 current value of the rotation parameters. 
 
-Because this assignment is to focus mostly on lighting, there are three
-toggle buttons to turn on and off each light source. There is a light 
-source that comes from above and mimics overhead lights in a room, then a
-light source that comes from the right, and one that has the OPPOSITE
-colors (compared to the one on the right) on the left. For example, if
-you add more red with the slider, it will be taken from the left and 
-given to the right. 
+This project builds on its predecessor, using similar lighting controls
+because they were deemed pretty neat last time. We've extended the Qt-based
+interface to be able to
+____________BLAH BLAH INSERT WHATEVER WE ACCOMPLISHED HERE_________
 
 
 ---------------------------------------------------------
@@ -129,9 +126,8 @@ Windows .exe file (dynamically-linked against the non-debug libraries.
 ------------------
  GitHub and stuff
 ------------------
-I won't lie, GitHub is still a bit of a mystery (given my account 
-was created, well, just now). As such, I just ask that group members
-please be careful in what they commit. I've setup rules to ignore
-any compiler temporaries / object files so that when you commit
-you shouldn't have to do a "make clean" first, but who really knows
-what will happen.
+Be careful when you commit! While I have mostly debugged the .gitignore file
+to work with the Qt framework's temp files on Windows and Linux, nothing is 
+guaranteed to work quite right, so simply do a "make clean" before committing,
+as this will save many a headache when it comes to compiling the source on a
+different environment. 
