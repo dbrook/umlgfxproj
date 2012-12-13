@@ -1,5 +1,10 @@
-Computer Graphics Final Assignment (91.427)
-===========================================
+Computer Graphics Assignment #3 (91.427)
+========================================
+
+*********************************************************************
+*  NOTE:                                                            *
+*  THIS IS NO LONGER THE PROJECT WE WILL BE USING FOR THE FINAL.    *
+*********************************************************************
 
 Project Group Name: The Red Menace 
 
@@ -22,7 +27,6 @@ This project builds on its predecessor, using similar lighting controls
 because they were deemed pretty neat last time. We've extended the Qt-based
 interface to be able to choose perspective or orthographic projection ON THE
 FLY, which is really just project #2 but in a new twist.
-
 
 
 ---------------------------------------------------------
