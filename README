@@ -20,8 +20,9 @@ current value of the rotation parameters.
 
 This project builds on its predecessor, using similar lighting controls
 because they were deemed pretty neat last time. We've extended the Qt-based
-interface to be able to
-____________BLAH BLAH INSERT WHATEVER WE ACCOMPLISHED HERE_________
+interface to be able to choose perspective or orthographic projection ON THE
+FLY, which is really just project #2 but in a new twist.
+
 
 
 ---------------------------------------------------------
