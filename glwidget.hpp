@@ -141,7 +141,7 @@ private:
 
         // For camera positions. May be deprecated in favor of a
         // QVector in the near/immediate future.
-        int xPos, yPos, zPos;
+        GLfloat xPos, yPos, zPos;
 
         QPoint lastPos;    // The last position the mouse was in (QPoint)
         QColor qtGreen;    // A shortcut to getting a real green
@@ -155,14 +155,16 @@ private:
         bool oppositeOn;   // State of the opposite / complement light
 
         /*
-         * Track the components of the colorable light. These will have to
-         * be normalized on a 0 to 1 floating point scale to be useful.
-         * (Why? Because QSlider widgets ONLY send int to other slots)
+         * Track the components of the colorable light. Why INTs? Because
+         * QSlider widgets ONLY send int to other slots.
          */
         int auxR, auxG, auxB, auxA;
         GLfloat auxColor[4], axxColor[4];
         
-        bool perspectiveMode;
+        bool perspectiveMode;  // Are we in perspective mode? TRUE
+                               // or orthographic mode? FALSE
+
+
 };
 
 #endif    //_GLWIDGET_H

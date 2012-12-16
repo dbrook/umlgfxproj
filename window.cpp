@@ -238,10 +238,10 @@ QSlider *Window::unitSlider( void )
         // to span the full range of RGB color values as processed
         // within GLWidget::aux[colorName], so make sure the sliders
         // don't allow it to happen.
-        slider->setRange( 1, 499 );
-        slider->setSingleStep( 5 );
+        slider->setRange( 1, 99 );
+        slider->setSingleStep( 2 );
         slider->setPageStep( 10 );
-        slider->setTickInterval( 50 );
+        slider->setTickInterval( 20 );
         slider->setTickPosition( QSlider::TicksAbove );
         return slider;
 }

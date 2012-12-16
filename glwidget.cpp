@@ -47,6 +47,7 @@ GLWidget::GLWidget( QWidget *parent ) :
         // Attempt to load whatever asset
         asset = new Asset3ds("models/monkey.3ds");
 
+
         std::cerr << "Loaded a new asset" << std::endl ;
 
         // Look dead-on at the scene to start (no initial rotations)
@@ -55,7 +56,12 @@ GLWidget::GLWidget( QWidget *parent ) :
         setZRotation( 0 );
 
         // Position Offset Initializer
-        xPos = yPos = zPos = 0;
+        xPos = yPos = 0;
+
+        // Push model BACK a bit to start. This is important because
+        // some are ungodly huge and need to be visible at least in some
+        // fashion right away, less the user thinks something failed.
+        zPos = -5.0;
 
         // These colors must be generated via CMYK values otherwise
         // it seems lighting will simply NOT WORK.
@@ -78,7 +84,6 @@ GLWidget::GLWidget( QWidget *parent ) :
         
         // Make the default on instantiation be perspective projection
         p_Perspective();
-        perspectiveMode = true;
 }
 
 /*
@@ -248,7 +253,7 @@ void GLWidget::auxRed( int userRed )
 {
         auxR = userRed;
         auxColor[0] = (float) auxR / 100.0;
-        axxColor[0] = (float) ((auxR - 500.0) * -1) / 100.0;
+        axxColor[0] = (float) ((auxR - 100.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -256,7 +261,7 @@ void GLWidget::auxGreen( int userGreen )
 {
         auxG = userGreen;
         auxColor[1] = (float) auxG / 100.0;
-        axxColor[1] = (float) ((auxG - 500.0) * -1) / 100.0;
+        axxColor[1] = (float) ((auxG - 100.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -264,7 +269,7 @@ void GLWidget::auxBlue( int userBlue )
 {
         auxB = userBlue;
         auxColor[2] = (float) auxB / 100.0;
-        axxColor[2] = (float) ((auxB - 500.0) * -1) / 100.0;
+        axxColor[2] = (float) ((auxB - 100.0) * -1) / 100.0;
         updateGL();
 }
 
@@ -362,7 +367,7 @@ void GLWidget::paintGL()
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glLoadIdentity();
 
-        glTranslatef( 0.0, 0.0, -0.75 );
+        glTranslatef( 0.0, 0.0, zPos );
         glRotatef( xRot / 16.0, 1.0, 0.0, 0.0 );
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
@@ -406,7 +411,7 @@ void GLWidget::resizeGL( int width, int height )
 
         */
         GLfloat top, bottom, left, right;
-        GLfloat fov = 40, near = 0.2, far = 15.0;
+        GLfloat fov = 40, near = 0.1, far = 100.0;
         
         if (perspectiveMode) {
 //                GLfloat aspect = (GLfloat) width / (GLfloat) height;
@@ -427,9 +432,9 @@ void GLWidget::resizeGL( int width, int height )
         } else {
                 // See if we're running OpenGL ES and use the proper function
 #ifdef QT_OPENGL_ES_1
-                glOrthof( -0.6, 0.6, -0.6, 0.6, near, far );
+                glOrthof( -2.0, 2.0, -2.0, 2.0, near, far );
 #else
-                glOrtho( -0.6, 0.6, -0.6, 0.6, near, far );
+                glOrtho( -2.0, 2.0, -2.0, 2.0, near, far );
 #endif
         }
         glMatrixMode( GL_MODELVIEW );
