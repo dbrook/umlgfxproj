@@ -18,7 +18,7 @@
 #include <cstring>
 #include <cassert>
 
-#include "angel/Angel.h"
+#include <GL/glew.h>
 
 class Asset3ds
 {
