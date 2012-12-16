@@ -16,6 +16,7 @@
 
 #include <QtGui>      // Pull in the actual interface to the GUI elems
 #include <iostream>
+#include <cstdio>
 #include <math.h>     // As with any good OpenGL program, there's a 
                       // healthy amount of under-the-hood mathematics!
 
@@ -44,7 +45,9 @@ GLWidget::GLWidget( QWidget *parent ) :
         // GLWidget::initializeGL() anyway.
         logo = 0;
 
+        ///////////////////////////////////////
         // Attempt to load whatever asset
+        ///////////////////////////////////////
         asset = new Asset3ds("models/elecloco/Locomotive chs4 072.3DS");
 
 
@@ -62,6 +65,9 @@ GLWidget::GLWidget( QWidget *parent ) :
         // some are ungodly huge and need to be visible at least in some
         // fashion right away, less the user thinks something failed.
         zPos = -20.0;
+
+        // Initialize motion state bools
+        moveUp_ = moveDn_ = moveRight_ = moveLeft_ = false;
 
         // These colors must be generated via CMYK values otherwise
         // it seems lighting will simply NOT WORK.
@@ -84,6 +90,14 @@ GLWidget::GLWidget( QWidget *parent ) :
         
         // Make the default on instantiation be perspective projection
         p_Perspective();
+
+        // Default size of orthographic projection mode
+        // (These are changed with the mouse wheel when in PROJECTION).
+        ortho_left = ortho_top = -3.0;
+        ortho_bottom = ortho_right = 3.0;
+
+        // Begin the updating of the GLwidget using the QTimerEvent here
+        startTimer( 20 );
 }
 
 /*
@@ -161,34 +175,52 @@ void GLWidget::setZRotation( int angle )
 
 void GLWidget::forward  ( void )
 {
-        zPos += 0.2;
+        if (!perspectiveMode) {
+                ortho_bottom += 0.2;
+                ortho_top    -= 0.2;
+                ortho_left   -= 0.2;
+                ortho_right  += 0.2;
+        } else {
+                zPos += 0.5;
+        }
+        // Evil way of forcing the redraw to happen
+        resizeGL( this->width(), this->height() );
         updateGL();
 }
 
 void GLWidget::backward ( void )
 {
-        zPos -= 0.2;
+        if (!perspectiveMode) {
+                ortho_bottom -= 0.2;
+                ortho_top    += 0.2;
+                ortho_left   += 0.2;
+                ortho_right  -= 0.2;
+        } else {
+                zPos -= 0.5;
+        }
+        // Evil way of forcing the redraw to happen
+        resizeGL( this->width(), this->height() );
         updateGL();
 }
 
-void GLWidget::strafeL  ( void )
+void GLWidget::strafeL  ( bool on )
 {
-
+        moveLeft_ = on;
 }
 
-void GLWidget::strafeR  ( void )
+void GLWidget::strafeR  ( bool on )
 {
-
+        moveRight_ = on;
 }
 
-void GLWidget::incrElev ( void )
+void GLWidget::incrElev ( bool on )
 {
-
+        moveUp_ = on;
 }
 
-void GLWidget::decrElev ( void )
+void GLWidget::decrElev ( bool on )
 {
-
+        moveDn_ = on;
 }
 
 /*
@@ -196,15 +228,15 @@ void GLWidget::decrElev ( void )
  */
 void GLWidget::panHorizontal( int direction )
 {
-        if (direction < 0)       xPos -= 0.1;
-        else                     xPos += 0.1;
+        if (direction < 0)       xPos -= 0.25;
+        else                     xPos += 0.25;
         updateGL();
 }
 
 void GLWidget::panVertical( int direction )
 {
-        if (direction < 0)       yPos -= 0.1;
-        else                     yPos += 0.1;
+        if (direction < 0)       yPos -= 0.25;
+        else                     yPos += 0.25;
         updateGL();
 }
 
@@ -376,6 +408,12 @@ void GLWidget::initializeGL()
 
         std::cerr << "Attempting to create the VBO!" << std::endl;
         asset->CreateVBO();
+
+        // The texture loading interface is very wonky still and
+        // needs more debugging time. We've removed all calls and
+        // interaction with the outside files that deal with them ... for now.
+//        loadGLTextures();
+//        glBindTexture(GL_TEXTURE_2D, *(asset->GetTexCoordVBO()));
 }
 
 // Basically the redraw call back from GLUT
@@ -389,17 +427,22 @@ void GLWidget::paintGL()
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
 
-//        glTranslatef( -xPos, -yPos, -zPos );
-
         glLightfv( GL_LIGHT1, GL_DIFFUSE, auxColor );
         glLightfv( GL_LIGHT2, GL_DIFFUSE, axxColor );
+
 /*
         // Have the logo redraw itself based on the new rotations!
         logo->draw();
  */
 
+        // This is where we'll put the textures on
+//        glEnable(GL_TEXTURE_2D);
+
         // Have the asset redraw!
         asset->Draw();
+
+        // Reset the texture state
+//        glDisable(GL_TEXTURE_2D);
 }
 
 /*
@@ -449,13 +492,63 @@ void GLWidget::resizeGL( int width, int height )
         } else {
                 // See if we're running OpenGL ES and use the proper function
 #ifdef QT_OPENGL_ES_1
-                glOrthof( -2.0, 2.0, -2.0, 2.0, near, far );
+                glOrthof( ortho_left, ortho_right, ortho_top, ortho_bottom, near, far );
 #else
-                glOrtho( -2.0, 2.0, -2.0, 2.0, near, far );
+                glOrtho( ortho_left, ortho_right, ortho_top, ortho_bottom, near, far );
 #endif
         }
         glMatrixMode( GL_MODELVIEW );
 }
+
+// Function is adapted from:
+//   http://stackoverflow.com/questions/10684705/texture-loading-with-opengl-in-qt
+void GLWidget::loadGLTextures()
+{
+        QImage t;
+        QImage b;
+
+        if ( !b.load( "models/iphone/Textures/Iphone_texture.jpg" ) )
+        {
+                qDebug("Unable to open the image.");
+                b = QImage( 16, 16, QImage::Format_RGB32 );
+                b.fill( 1 );
+        }
+
+        t = QGLWidget::convertToGLFormat( b );
+        glGenTextures( 1, asset->GetTexCoordVBO() );
+        glBindTexture( GL_TEXTURE_2D, *(asset->GetTexCoordVBO()) );
+
+        printf( "%p\n", asset->GetTexCoordVBO() );
+
+        unsigned int p2 = *(asset->GetTexCoordVBO());
+        std::cout << "*(asset->GetTexCoordVBO()) = " << p2 << std::endl;
+
+        glTexImage2D( GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits() );
+        //glTexImage2D( GL_TEXTURE_2D, 0, 3, t.height(), t.width(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits() );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
+
+/*
+ * The time event will keep looking for updates to the motion key statuses
+ */
+void GLWidget::timerEvent( QTimerEvent *timer )
+{
+        /*
+         * This area will control all possible directions of camera movement
+         */
+        if (moveUp_) {
+                panVertical(-1.0);
+        } else if (moveDn_) {
+                panVertical(1.0);
+        } else if (moveLeft_) {
+                panHorizontal(1.0);
+        } else if (moveRight_){
+                panHorizontal(-1.0);
+        }
+}
+
 
 /*
  * Mouse clicked handler:
@@ -480,6 +573,8 @@ void GLWidget::mouseMoveEvent( QMouseEvent *event )
         if (event->buttons() & Qt::LeftButton) {
                 setXRotation( xRot + 8 * dy );
                 setYRotation( yRot + 8 * dx );
+//                panHorizontal( xPos + dx );
+//                panVertical( yPos + dy );
         }
         /*else {
                 setXRotation( xRot + 8 * dy );

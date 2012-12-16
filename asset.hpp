@@ -39,6 +39,9 @@ public:
         // This must be done at the frame buffer init.
         virtual void CreateVBO();
 
+        // Returns texture coordinate vertex buffer object
+        virtual GLuint *GetTexCoordVBO( void );
+
         // Destructor. Qt may be nice about its own cleanup, but glDeleteBuffer
         // needs to be called on the private VBO members of this class.
         virtual ~Asset3ds();
@@ -47,7 +50,8 @@ protected:
         void GetFaces();                   // internal use
         unsigned int m_TotalFaces;
         Lib3dsFile * m_model;              // a 3ds file pointer (to our model)
-        GLuint m_VertexVBO, m_NormalVBO;   // vertex and normal buffer objects
+
+        GLuint m_VertexVBO, m_NormalVBO, m_TexCoordVBO;   // vertex and normal buffer objects
 };
 
 #endif    // _ASSET_H

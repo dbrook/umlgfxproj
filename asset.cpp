@@ -3,6 +3,9 @@
  *
  * Implementation of the code to interface with lib3ds.
  * Original Source: http://www.donkerdump.nl/node/207
+ *
+ * The texture processing aspects have been adapted from:
+ *   http://www.gamedev.net/topic/490141-lib3ds-texture-coordinates-and-vbos/
  */
 
 #include "asset.hpp"
@@ -41,17 +44,27 @@ void Asset3ds::CreateVBO()
         Lib3dsVector * vertices = new Lib3dsVector[m_TotalFaces * 3];
         Lib3dsVector * normals = new Lib3dsVector[m_TotalFaces * 3];
 
+        // Setup the vector of texture coordinates
+        Lib3dsTexel  * texCoords = new Lib3dsTexel[m_TotalFaces * 3];
+
         Lib3dsMesh * mesh;
         unsigned int FinishedFaces = 0;
+
         // Loop through all the meshes
         for (mesh = m_model->meshes; mesh != NULL; mesh = mesh->next) {
-                lib3ds_mesh_calculate_normals(mesh,
-                                &normals[FinishedFaces * 3]);
+                lib3ds_mesh_calculate_normals(mesh, &normals[FinishedFaces * 3]);
                 // Loop through every face
                 for (unsigned int cur_face = 0; cur_face < mesh->faces;
                                 cur_face++) {
                         Lib3dsFace * face = &mesh->faceL[cur_face];
                         for (unsigned int i = 0; i < 3; i++) {
+
+                                // Are there texture coordinates? If so get them
+                                if (mesh->texels) {
+                                        memcpy( &texCoords[FinishedFaces * 3 + i],
+                                                mesh->texelL[face->points[i]],
+                                                sizeof(Lib3dsTexel) );
+                                }
                                 memcpy(&vertices[FinishedFaces * 3 + i],
                                                 mesh->pointL[face->points[i]].pos,
                                                 sizeof(Lib3dsVector));
@@ -78,9 +91,15 @@ void Asset3ds::CreateVBO()
         glBufferData(GL_ARRAY_BUFFER, sizeof(Lib3dsVector) * 3 * m_TotalFaces,
                         normals, GL_STATIC_DRAW);
 
+        // Make a 3rd VBO with the texture coordinates in it
+        glGenBuffers(1, &m_TexCoordVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Lib3dsTexel) * 3 * m_TotalFaces, texCoords, GL_STATIC_DRAW);
+
         // Clean up our allocated memory
         delete vertices;
         delete normals;
+        delete texCoords;
 
         // We no longer need lib3ds
         lib3ds_file_free(m_model);
@@ -100,6 +119,11 @@ void Asset3ds::GetFaces()
         }
 }
 
+GLuint * Asset3ds::GetTexCoordVBO( void )
+{
+        return &(this->m_TexCoordVBO);
+}
+
 void Asset3ds::Draw() const
 {
         assert(m_TotalFaces != 0);
@@ -107,11 +131,20 @@ void Asset3ds::Draw() const
         // Enable vertex and normal arrays
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         // Bind the vbo with the normals
         glBindBuffer(GL_ARRAY_BUFFER, m_NormalVBO);
+
         // The pointer for the normals is NULL which means that OpenGL will use the currently bound vbo
         glNormalPointer(GL_FLOAT, 0, NULL);
+
+        glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordVBO);
+
+        //////////
+        //// THIS MIGHT NEED TO BE A 2
+        //////////
+        glTexCoordPointer(3, GL_FLOAT, 0, NULL);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_VertexVBO);
         glVertexPointer(3, GL_FLOAT, 0, NULL);
@@ -121,4 +154,5 @@ void Asset3ds::Draw() const
 
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_NORMAL_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }

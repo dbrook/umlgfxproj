@@ -251,27 +251,38 @@ QSlider *Window::unitSlider( void )
 /*
  * Exit on an escape or a q.
  * Move the scene up/down/left/right with s/w/d/a
+ * ** IMPORTANT: the keyReleaseEvent will be needed to send the disable
+ *               motion request. Otherwise the scene will keep going!
  */
 void Window::keyPressEvent( QKeyEvent *e )
 {
         // Typical WASD controls for the scene
         if (e->key() == Qt::Key_W)
-                glWidget->panVertical(-1.0);
+                glWidget->incrElev( true );
         else if (e->key() == Qt::Key_S)
-                glWidget->panVertical(1.0);
+                glWidget->decrElev( true );
         else if (e->key() == Qt::Key_A)
-                glWidget->panHorizontal(1.0);
+                glWidget->strafeL( true );
         else if (e->key() == Qt::Key_D)
-                glWidget->panHorizontal(-1.0);
-//        else if (e->key() == Qt::Key_E)
-//                glWidget->incrElev();
-//        else if (e->key() == Qt::Key_Z)
-//                glWidget->decrElev();
+                glWidget->strafeR( true );
 
         if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Q)
                 close();
         else
                 QWidget::keyPressEvent( e );
+}
+
+void Window::keyReleaseEvent( QKeyEvent *e )
+{
+        // Typical WASD controls for the scene
+        if (e->key() == Qt::Key_W)
+                glWidget->incrElev(false);
+        else if (e->key() == Qt::Key_S)
+                glWidget->decrElev(false);
+        else if (e->key() == Qt::Key_A)
+                glWidget->strafeL(false);
+        else if (e->key() == Qt::Key_D)
+                glWidget->strafeR(false);
 }
 
 /*

@@ -38,6 +38,9 @@ public:
         // Makes sure any OpenGL-specific data structures are cleaned
         ~GLWidget();
 
+        // Timing for smooth scene motion
+        void timerEvent( QTimerEvent *timer );
+
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
@@ -60,10 +63,10 @@ public slots:
 
         void forward  ( void );
         void backward ( void );
-        void strafeL  ( void );
-        void strafeR  ( void );
-        void incrElev ( void );
-        void decrElev ( void );
+        void strafeL  ( bool );
+        void strafeR  ( bool );
+        void incrElev ( bool );
+        void decrElev ( bool );
 
         // Panning offsets: direction is negative to move viewport LEFT / DOWN
         //                               positive to move viewport RIGHT / UP
@@ -120,6 +123,10 @@ protected:
         void paintGL();
         void resizeGL( int width, int height );  // Called on every resize
 
+        // Function to load the textures (they will be "placed" by the asset handler)
+        void loadGLTextures( void );
+
+
         // Mouse-button-was-pressed within the framebuffer (EVENT HANDLER)
         void mousePressEvent( QMouseEvent *event );
 
@@ -142,7 +149,9 @@ private:
         // For camera positions. May be deprecated in favor of a
         // QVector in the near/immediate future.
         GLfloat xPos, yPos, zPos;
-        GLfloat xOffset, yOffset;  // Viewport horizontal and vertical axes
+
+        // State flags to determine if the scene needs moving
+        bool moveUp_, moveDn_, moveRight_, moveLeft_;
 
         QPoint lastPos;    // The last position the mouse was in (QPoint)
         QColor qtGreen;    // A shortcut to getting a real green
@@ -164,6 +173,7 @@ private:
         
         bool perspectiveMode;  // Are we in perspective mode? TRUE
                                // or orthographic mode? FALSE
+        GLfloat ortho_left, ortho_right, ortho_top, ortho_bottom;
 };
 
 #endif    //_GLWIDGET_H

@@ -39,8 +39,9 @@ public:
         Window();
 
 protected:
-        // Handles the pressing of keys
+        // Handles the pressing of keys and wheel motion in the scene
         void keyPressEvent( QKeyEvent *event );
+        void keyReleaseEvent( QKeyEvent *event );
         void wheelEvent( QWheelEvent *event );
 
 private:
