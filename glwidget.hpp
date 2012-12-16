@@ -52,7 +52,7 @@ public:
          */
 public slots:
         /*
-         * Change scene rotation via these slots
+         * Change scene rotation and alignment via these slots
          */
         void setXRotation( int angle );
         void setYRotation( int angle );
@@ -65,6 +65,11 @@ public slots:
         void incrElev ( void );
         void decrElev ( void );
 
+        // Panning offsets: direction is negative to move viewport LEFT / DOWN
+        //                               positive to move viewport RIGHT / UP
+        void panHorizontal( int direction );
+        void panVertical( int direction );
+
         /*
          * Control function to emulate the room light being switched
          * on or off. This is a little bit of a "cheat" because while
@@ -73,12 +78,7 @@ public slots:
          * this slot will also fudge the background to make it darker.
          */
         void lightAmbientToggle( void );
-
         void oppositeLightToggle( void );
-
-        /*
-         * Turn the spotlight on or off depending on the
-         */
         void auxLightToggle( void );
 
         /*
@@ -142,6 +142,7 @@ private:
         // For camera positions. May be deprecated in favor of a
         // QVector in the near/immediate future.
         GLfloat xPos, yPos, zPos;
+        GLfloat xOffset, yOffset;  // Viewport horizontal and vertical axes
 
         QPoint lastPos;    // The last position the mouse was in (QPoint)
         QColor qtGreen;    // A shortcut to getting a real green
@@ -163,8 +164,6 @@ private:
         
         bool perspectiveMode;  // Are we in perspective mode? TRUE
                                // or orthographic mode? FALSE
-
-
 };
 
 #endif    //_GLWIDGET_H

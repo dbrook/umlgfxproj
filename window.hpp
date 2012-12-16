@@ -41,6 +41,7 @@ public:
 protected:
         // Handles the pressing of keys
         void keyPressEvent( QKeyEvent *event );
+        void wheelEvent( QWheelEvent *event );
 
 private:
         // Creates a slider ideal for the adjustment of angles

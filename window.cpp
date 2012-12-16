@@ -18,6 +18,8 @@
 #include "glwidget.hpp"   // Local project include
 #include "window.hpp"     // Local project include
 
+#include <iostream>       // Debugging and testing purposes
+
 /*
  * Default (and only) constructor to setup layout and signals/slots.
  */
@@ -247,26 +249,43 @@ QSlider *Window::unitSlider( void )
 }
 
 /*
- * Exit on an escape ... ignore all others
+ * Exit on an escape or a q.
+ * Move the scene up/down/left/right with s/w/d/a
  */
 void Window::keyPressEvent( QKeyEvent *e )
 {
         // Typical WASD controls for the scene
         if (e->key() == Qt::Key_W)
-                glWidget->forward();
+                glWidget->panVertical(-1.0);
         else if (e->key() == Qt::Key_S)
-                glWidget->backward();
+                glWidget->panVertical(1.0);
         else if (e->key() == Qt::Key_A)
-                glWidget->strafeL();
+                glWidget->panHorizontal(1.0);
         else if (e->key() == Qt::Key_D)
-                glWidget->strafeR();
-        else if (e->key() == Qt::Key_E)
-                glWidget->incrElev();
-        else if (e->key() == Qt::Key_Z)
-                glWidget->decrElev();
+                glWidget->panHorizontal(-1.0);
+//        else if (e->key() == Qt::Key_E)
+//                glWidget->incrElev();
+//        else if (e->key() == Qt::Key_Z)
+//                glWidget->decrElev();
 
-        if (e->key() == Qt::Key_Escape)
+        if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Q)
                 close();
         else
                 QWidget::keyPressEvent( e );
+}
+
+/*
+ * Scroll UP will push the scene away from your viewing point, and
+ * a scroll DOWN will pull it towards you. This is accomplished by
+ * modifying the zPos variable that is used for the scene translation
+ * on each QGLWidget::paintGL() call.
+ */
+void Window::wheelEvent( QWheelEvent *e )
+{
+        int steps = e->delta();
+
+        if (steps < 0)
+                glWidget->forward();
+        else
+                glWidget->backward();
 }

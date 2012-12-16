@@ -61,7 +61,7 @@ GLWidget::GLWidget( QWidget *parent ) :
         // Push model BACK a bit to start. This is important because
         // some are ungodly huge and need to be visible at least in some
         // fashion right away, less the user thinks something failed.
-        zPos = -5.0;
+        zPos = -20.0;
 
         // These colors must be generated via CMYK values otherwise
         // it seems lighting will simply NOT WORK.
@@ -161,12 +161,14 @@ void GLWidget::setZRotation( int angle )
 
 void GLWidget::forward  ( void )
 {
-
+        zPos += 0.2;
+        updateGL();
 }
 
 void GLWidget::backward ( void )
 {
-
+        zPos -= 0.2;
+        updateGL();
 }
 
 void GLWidget::strafeL  ( void )
@@ -188,6 +190,24 @@ void GLWidget::decrElev ( void )
 {
 
 }
+
+/*
+ * Panning functions for the scene's viewport
+ */
+void GLWidget::panHorizontal( int direction )
+{
+        if (direction < 0)       xPos -= 0.1;
+        else                     xPos += 0.1;
+        updateGL();
+}
+
+void GLWidget::panVertical( int direction )
+{
+        if (direction < 0)       yPos -= 0.1;
+        else                     yPos += 0.1;
+        updateGL();
+}
+
 
 /*
  * Slots for manipulating the light source. This is a pretty straight
@@ -351,9 +371,6 @@ void GLWidget::initializeGL()
         static GLfloat llPos[4] = { -1.0, 0.0, 0.1, 0.0 };
         glLightfv( GL_LIGHT2, GL_POSITION, llPos );
 
-        // Assuring we're in the proper context to continue to create a VBO
-
-
         // Create the vertex buffer array with the object!
         // NOTE: This fails unless you have the proper context first.
 
@@ -367,7 +384,7 @@ void GLWidget::paintGL()
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glLoadIdentity();
 
-        glTranslatef( 0.0, 0.0, zPos );
+        glTranslatef( xPos, yPos, zPos );
         glRotatef( xRot / 16.0, 1.0, 0.0, 0.0 );
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
