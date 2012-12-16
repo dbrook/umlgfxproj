@@ -45,7 +45,7 @@ GLWidget::GLWidget( QWidget *parent ) :
         logo = 0;
 
         // Attempt to load whatever asset
-        asset = new Asset3ds("models/monkey.3ds");
+        asset = new Asset3ds("models/elecloco/Locomotive chs4 072.3DS");
 
 
         std::cerr << "Loaded a new asset" << std::endl ;
