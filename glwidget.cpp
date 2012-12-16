@@ -14,9 +14,8 @@
  * other Qt-specific bindings for the widget itself.
  */
 
-
 #include <QtGui>      // Pull in the actual interface to the GUI elems
-#include <QtOpenGL>   // Pull in the Qt-abstracted OpenGL interface
+#include <iostream>
 #include <math.h>     // As with any good OpenGL program, there's a 
                       // healthy amount of under-the-hood mathematics!
 
@@ -29,6 +28,8 @@ static float toRadians( float degrees )
 // Project local includes
 #include "glwidget.hpp" // grab our GLWidget class
 #include "qtlogo.hpp"   // get the Qt framework's logo (to be shown)
+
+
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
 #endif
@@ -43,10 +44,15 @@ GLWidget::GLWidget( QWidget *parent ) :
         // GLWidget::initializeGL() anyway.
         logo = 0;
 
+        // Attempt to load whatever asset
+        asset = new Asset3ds("models/monkey.3ds");
+
+        std::cerr << "Loaded a new asset" << std::endl ;
+
         // Look dead-on at the scene to start (no initial rotations)
-        xRot = 0;
-        yRot = 0;
-        zRot = 0;
+        setXRotation( 0 );
+        setYRotation( 0 );
+        setZRotation( 0 );
 
         // Position Offset Initializer
         xPos = yPos = zPos = 0;
@@ -66,9 +72,12 @@ GLWidget::GLWidget( QWidget *parent ) :
         oppositeOn   = true;
 
         // The starting values for the variable color light
-        auxR = auxG = auxB = auxA = 0;
+        auxRed(10);
+        auxGreen(10);
+        auxBlue(10);
         
         // Make the default on instantiation be perspective projection
+        p_Perspective();
         perspectiveMode = true;
 }
 
@@ -85,7 +94,7 @@ GLWidget::~GLWidget()
  */
 QSize GLWidget::minimumSizeHint() const
 {
-        return QSize( 50, 50 );
+        return QSize( 250, 250 );
 }
 
 /*
@@ -189,7 +198,6 @@ void GLWidget::lightAmbientToggle( void )
                 // Change the background to be darker w/o ambient light
                 qglClearColor( qtDark.dark() );
                 ambientLight = false;
-                emit ambientLightChanged( false );
 
         } else {
                 // Light is off when called, so turn it back on
@@ -197,7 +205,6 @@ void GLWidget::lightAmbientToggle( void )
 
                 qglClearColor( qtGray.light() );
                 ambientLight = true;
-                emit ambientLightChanged( true );
         }
         updateGL();                // Commit the change to the scene
 }
@@ -306,9 +313,11 @@ void GLWidget::initializeGL()
         //qglClearColor( qtPurple.dark() );
         qglClearColor( qtGray.light() );
 
+/*
         // Make a QtLogo (this has been provided to us), (make it green!)
         logo = new QtLogo( this, 64 );
         logo->setColor( qtPurple.dark() );
+*/
 
         glEnable( GL_DEPTH_TEST );
         glEnable( GL_CULL_FACE );
@@ -330,19 +339,21 @@ void GLWidget::initializeGL()
         static GLfloat lightPosition[4] = { 0.0, 0.9, 0.5, 1.0 };
         glLightfv( GL_LIGHT0, GL_POSITION, lightPosition );
 
-        // Initialize the movable light
+        // Initialize the side lights
         static GLfloat flPos[4] = { 1.0, 0.0, 0.1, 0.0 };
         glLightfv( GL_LIGHT1, GL_POSITION, flPos );
 
         static GLfloat llPos[4] = { -1.0, 0.0, 0.1, 0.0 };
         glLightfv( GL_LIGHT2, GL_POSITION, llPos );
 
-        /*
-         * Commented-out because colors are now individually
-         * controlled via the aux_ slots.
-         */
-        //static GLfloat flCol[4] = { 0.0, 0.8, 0.0, 1.0 };
-        //glLightfv( GL_LIGHT1, GL_DIFFUSE, flCol );
+        // Assuring we're in the proper context to continue to create a VBO
+
+
+        // Create the vertex buffer array with the object!
+        // NOTE: This fails unless you have the proper context first.
+
+        std::cerr << "Attempting to create the VBO!" << std::endl;
+        asset->CreateVBO();
 }
 
 // Basically the redraw call back from GLUT
@@ -351,7 +362,7 @@ void GLWidget::paintGL()
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
         glLoadIdentity();
 
-        glTranslatef( 0.0, 0.0, -0.75 );        // Need -10 to be visible!
+        glTranslatef( 0.0, 0.0, -0.75 );
         glRotatef( xRot / 16.0, 1.0, 0.0, 0.0 );
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
@@ -360,9 +371,13 @@ void GLWidget::paintGL()
 
         glLightfv( GL_LIGHT1, GL_DIFFUSE, auxColor );
         glLightfv( GL_LIGHT2, GL_DIFFUSE, axxColor );
-
+/*
         // Have the logo redraw itself based on the new rotations!
         logo->draw();
+ */
+
+        // Have the asset redraw!
+        asset->Draw();
 }
 
 /*

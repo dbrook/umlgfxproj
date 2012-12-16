@@ -17,7 +17,9 @@
 #ifndef _GLWIDGET_H
 #define _GLWIDGET_H
 
+#include "asset.hpp"   // Our new magical asset loading tool
 #include <QGLWidget>   // The OpenGL "canvas" of sorts
+
 class QtLogo;
 // We'll use this for dummy test data for now
 
@@ -103,25 +105,16 @@ signals:
         void yRotationChanged( int angle );
         void zRotationChanged( int angle );
 
-        /*
-         * The current lighting state should get emitted to update
-         * GUI widgets (for example: turning the "Turn On" button
-         * to say "Turn Off" when the light source is enabled).
-         *
-         * (Might not actually implement these, but good to have
-         * if we want to easily turn such an option on later)
-         */
-        void ambientLightChanged( bool qOn );
-
 protected:
         /*
-         * VERY VERY VERY REDICULOUSLY IMPORTANT INFO RIGHT HERE!!
-         * 
+         * IMPORTANT:
          * Initializing the OpenGL systems, resizing of the viewport,
          * and actually drawing the scenes are handled by redefining
          * the skeleton functions given by QGLWidget (the framework's
          * copy of it is essentially empty and we put our OpenGL code
          * in these by simply redefining the member functions).
+         * The bulk of the regular OpenGL code like we've seen in the
+         * Angel code is done in these functions.
          */
         void initializeGL();
         void paintGL();
@@ -139,10 +132,15 @@ private:
          * these are kind of like the globals we had in the Angel exs.
          */
         QtLogo *logo;      // The logo object that will show on the screen
+
+        Asset3ds *asset;   // Our new magic asset (must be a 3ds file)
+
         int xRot;          // X-Axis orientation value (DEGREES)
         int yRot;          // Y-Axis orientation value (DEGREES)
         int zRot;          // Z-Axis orientation value (DEGREES)
 
+        // For camera positions. May be deprecated in favor of a
+        // QVector in the near/immediate future.
         int xPos, yPos, zPos;
 
         QPoint lastPos;    // The last position the mouse was in (QPoint)

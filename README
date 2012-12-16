@@ -1,10 +1,5 @@
-Computer Graphics Assignment #3 (91.427)
+Computer Graphics Final Project (91.427)
 ========================================
-
-*********************************************************************
-*  NOTE:                                                            *
-*  THIS IS NO LONGER THE PROJECT WE WILL BE USING FOR THE FINAL.    *
-*********************************************************************
 
 Project Group Name: The Red Menace 
 
@@ -16,17 +11,25 @@ Members:
 ----------------------
  Project Introduction
 ----------------------
-This project (at this stage) is based off of a Qt OpenGL test interface.
+This application will open any 3ds model and allow the user to pan around
+it, change colors, and toggle / mutate light sources that impact the object.
 The window that spawns at run-time is dominated (size-wise) with an OpenGL
-frame buffer (a Qt widget that partially mimics GLUT functions). The mouse
-can be used to click and drag within the scene to change its rotation, and
-the sliders to the right use "signals" from the window to reflect the 
-current value of the rotation parameters. 
+frame buffer called a QGLWidget (a framebuffer encapsulated within a window).
+This allows us to have the comforting features of familiar GUI controls, while
+also being able to interact with a 3d environment and any scene in it.
+The mouse can be used to click and drag within the scene to change its
+rotation, and the sliders to the right use "signals" from the window to 
+reflect the current value of the rotation parameters. 
 
 This project builds on its predecessor, using similar lighting controls
-because they were deemed pretty neat last time. We've extended the Qt-based
+because they were deemed rather neat last time. We've extended the Qt-based
 interface to be able to choose perspective or orthographic projection ON THE
 FLY, which is really just project #2 but in a new twist.
+
+
+___ FUTURE FEATURES ___
+
+Probably a control to allow scaling of models? Heck, we could shear them too.
 
 
 ---------------------------------------------------------
@@ -58,23 +61,22 @@ little more sane and easier to code under source control like GitHub.
 ----------------------------------------------
 Implementing [some of] the following ideas are possibly within our grasp!
 
- - Still use the keyboard to move:
-      Up, down, left, right, backwards, forwards
-      
  - Use the mouse to change looking direction (up/down, left/right)
 
- - Add two sets of controls for additional light source(s)
+ - Add a set of controls for additional light source(s)
 
- - Have the application take an argument / any file and load it up into
-    the frame buffer using "assimp" (The Open Asset Import Library) which 
-    will have the ability to ingest these formats (some possibilities)
-      + Blender 3D files (.blend)
-      + 3ds Max 3DS (.3ds)
-      + ... and TONS more.
+ - Have the application take an argument or use a widget to place a file
+    name (of a .3ds file) and load it up into the frame buffer using lib3ds.
 
- - Lastly, Qt can handle network transport (like HTTP), so maybe add a 
-    way to load a model from a user-provided URL? If the loading of 
-    user-supplied local models, this should actually be a breeze to do.
+ - PLATFORM INDEPENDENCE! -- With the exception of lib3ds, the entire project
+    has merely Qt dependencies. You'll see in the .pro file that the only
+    external library linked against is lib3ds, which is available freely
+    at: http://code.google.com/p/lib3ds/. However, it's packaged in most
+    GNU/Linux systems and is available on macports with [relatively] little 
+    pain.
+
+ //TODO: Write a guide for compiling lib3ds for Windows.
+ //TODO: Create and update a unified .pro file for lib3ds on the Mac
     
 
 ------------------------
@@ -94,10 +96,7 @@ not done by the installer. Once the paths for qt\bin and mingw\bin are
 placed in the user's path, the project can then be compiled from this
 source very easily.
 
-On the Mac, well ... it SHOULD have been as simple as getting the 
-.dmg installer from qt-project.org but we've had a couple of issues
-after running "qmake" of unresolved system paths which haven't made
-sense so far. 
+On the Mac, ___ INSTRUCTIONS PENDING SUCCESSFUL CONFIG ON OUR MAC ___
 
 
 -----------------------
@@ -133,6 +132,7 @@ Windows .exe file (dynamically-linked against the non-debug libraries.
 ------------------
 Be careful when you commit! While I have mostly debugged the .gitignore file
 to work with the Qt framework's temp files on Windows and Linux, nothing is 
-guaranteed to work quite right, so simply do a "make clean" before committing,
-as this will save many a headache when it comes to compiling the source on a
-different environment. 
+guaranteed to work quite right (is it ever?), so simply do a "make clean" 
+before committing, please. Thishis will save many a headache when it comes to
+compiling the source on a different environment. 
+

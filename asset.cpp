@@ -1,26 +1,25 @@
 /*
  * Filename: asset.cpp
  *
- * Implementation of the code to interface with ASSIMP
+ * Implementation of the code to interface with lib3ds.
+ * Original Source: http://www.donkerdump.nl/node/207
  */
 
 #include "asset.hpp"
+#include <iostream>
 
-// Load 3DS model
 Asset3ds::Asset3ds(std::string filename)
 {
-        m_VertexVBO = 0;
-        m_NormalVBO = 0;
         m_TotalFaces = 0;
 
         m_model = lib3ds_file_load(filename.c_str());
         // If loading the model failed, we throw an exception
         if (!m_model) {
-                throw strcat("Unable to load ", filename.c_str());
+                std::cerr << "No file to load!\n";
+                throw 1;
         }
 }
 
-// Destructor
 Asset3ds::~Asset3ds()
 {
         glDeleteBuffers(1, &m_VertexVBO);
@@ -31,7 +30,6 @@ Asset3ds::~Asset3ds()
         }
 }
 
-// Copy vertices and normals to the memory of the GPU
 void Asset3ds::CreateVBO()
 {
         assert(m_model != NULL);
@@ -63,6 +61,12 @@ void Asset3ds::CreateVBO()
         }
 
         // Generate a Vertex Buffer Object and store it with our vertices
+
+        //
+        // WHY DOES THIS SEGFAULT!? (-- it doesn't anymore)
+        // Weird application states, don't use GLEW, Qt is doing a GREAT
+        // amount of work for us as it turns out! (Thanks, Qt, you're amazing)
+        //
         glGenBuffers(1, &m_VertexVBO);
         glBindBuffer(GL_ARRAY_BUFFER, m_VertexVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Lib3dsVector) * 3 * m_TotalFaces,
@@ -83,7 +87,6 @@ void Asset3ds::CreateVBO()
         m_model = NULL;
 }
 
-// Count the total number of faces this model has
 void Asset3ds::GetFaces()
 {
         assert(m_model != NULL);
@@ -97,7 +100,6 @@ void Asset3ds::GetFaces()
         }
 }
 
-// Render the model using Vertex Buffer Objects
 void Asset3ds::Draw() const
 {
         assert(m_TotalFaces != 0);
