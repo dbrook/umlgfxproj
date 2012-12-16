@@ -8,7 +8,7 @@ SOURCES      = asset.cpp\
                window.cpp \
                qtlogo.cpp
 
-#LIBS		+= -lfreeglut
+LIBS        += -lGLEW -l3ds
 
 QT          += opengl
 
