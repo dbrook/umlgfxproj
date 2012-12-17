@@ -17,8 +17,12 @@
 #define GL_GLEXT_PROTOTYPES
 #include <QtOpenGL>
 
+#ifdef __APPLE__
+#include <lib3ds.h>
+#else
 #include <lib3ds/file.h>
 #include <lib3ds/mesh.h>
+#endif
 
 #include <string>
 #include <cstring>
