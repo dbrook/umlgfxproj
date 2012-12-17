@@ -40,6 +40,9 @@ public:
         virtual void CreateVBO();
 
         // Returns texture coordinate vertex buffer object
+        // This is normally bad practice (to return a pointer to data
+        // in another class' scope, but OpenGL being what it is we couldn't
+        // come up with another way because IT loves globals so much.
         virtual GLuint *GetTexCoordVBO( void );
 
         // Destructor. Qt may be nice about its own cleanup, but glDeleteBuffer

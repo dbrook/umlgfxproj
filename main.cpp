@@ -24,8 +24,8 @@
 
 #include <QApplication>     // Needed to pull in Qt app. framework
 #include <QDesktopWidget>   // Pulls in the Qt - Window Manager i-face
-
-
+#include <string>
+#include <iostream>
 
 #include "window.hpp"       // Actual interface to the GUI window
 
@@ -37,6 +37,11 @@ int main( int argc, char *argv[] )
 {
         // Make a QApplication that can take any command line arguments
         QApplication app( argc, argv );
+
+        if (argc != 2) {
+                std::cerr << "You must provide a model file path (relative to working directory)" << std::endl;
+                exit( 0 );
+        }
 
         Window window;   // Creates a window (widgets will go in there)
         window.resize( window.sizeHint() );

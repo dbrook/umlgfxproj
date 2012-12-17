@@ -8,6 +8,10 @@
  *
  * File Description:
  * A little segment of the program to create a Qt logo from scratch.
+ *
+ * NOTE: This is no longer used in the project since we can now load any
+ *       3DS asset we choose (at the command line). It has been kept in case
+ *       it's ever needed in the future.
  */
 
 

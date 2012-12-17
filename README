@@ -21,15 +21,32 @@ The mouse can be used to click and drag within the scene to change its
 rotation, and the sliders to the right use "signals" from the window to 
 reflect the current value of the rotation parameters. 
 
+The interface has been extended to be able to load ANY .3DS -type model that
+the user wants to send at it! To run, simply execute:
+
+     ./finalproject path/to/the/model.3ds
+
 This project builds on its predecessor, using similar lighting controls
 because they were deemed rather neat last time. We've extended the Qt-based
 interface to be able to choose perspective or orthographic projection ON THE
-FLY, which is really just project #2 but in a new twist.
+FLY, which is really just project #2 but in a new twist. Because the
+projection matrices and configuration are updated with the widget resize
+handler, we've done a little bizarre trickery to accomplish the proper
+reactions with the projection selection (calling resize() with the current
+window sizes ... sneaky, no?)
 
+You can now use the scroll wheel to pull a scene closer and push it farther
+away. This feature was desperately needed with the advent of runtime model
+loading (because some are huge and some are tiny, it depends on the creator).
+Additionally, W will move the buffer window clipping area UP, S will move it
+down, A will move it left, and D will move it right. This is made to look
+smoother by using a QTimerEvent to loop quickly in very small intervals,
+rather than the evil way of using OS-dependent keyboard repeat rates to do
+this.
 
-___ FUTURE FEATURES ___
-
-Probably a control to allow scaling of models? Heck, we could shear them too.
+Lastly, because of oddities when it comes to mutating the display frame a
+bunch of times, a reset button has been included to "put Humpty Dumpty back
+together again".
 
 
 ---------------------------------------------------------
@@ -69,45 +86,37 @@ Implementing [some of] the following ideas are possibly within our grasp!
     name (of a .3ds file) and load it up into the frame buffer using lib3ds.
 
  - PLATFORM INDEPENDENCE! -- With the exception of lib3ds, the entire project
-    has merely Qt dependencies. You'll see in the .pro file that the only
+    has only mere Qt dependencies. You'll see in the .pro file that the only
     external library linked against is lib3ds, which is available freely
     at: http://code.google.com/p/lib3ds/. However, it's packaged in most
     GNU/Linux systems and is available on macports with [relatively] little 
     pain.
 
- //TODO: Write a guide for compiling lib3ds for Windows.
- //TODO: Create and update a unified .pro file for lib3ds on the Mac
-    
 
 ------------------------
  Getting up and running
 ------------------------
-Find your distribution's installer at qt-project.org. If you're using
-Linux, simply installing the Qt development libraries from your
-system's package manager should pull in all the runtime dependencies as
-well and allow you to build the project. To check if they're installed
-a simple "which qmake" should return "/usr/bin/qmake" or something 
-similar.
+Due to timing constraints, we have limited functionality to the GNU/Linux
+platform. Installing lib3ds in this environment is very simple in almost every
+distribution we've looked at. So combined with having the Qt development
+headers, building is very simple.
 
-On Windows, installing MinGW with C++ and then installing Qt for MinGW
-is the easiest way to go. The process is almost fully automatic, but
-misses one very important thing; setting the environment variables is
-not done by the installer. Once the paths for qt\bin and mingw\bin are
-placed in the user's path, the project can then be compiled from this
-source very easily.
+On Debian, for example, you'll have to:
+     apt-get install lib3ds-dev
+     apt-get install libqt4-dev
 
-On the Mac, ___ INSTRUCTIONS PENDING SUCCESSFUL CONFIG ON OUR MAC ___
+Now, onto the building instructions...
 
 
 -----------------------
  Building from scratch
 -----------------------
-Upon the initial grabbing of the sources from the repository you will
-need to run 'qmake' from the project directory itself. The qmake will
-parse the .pro file as well as the target system's build parameters to
-create a makefile that resolves all the includes and other system-
-specific details so building a binary/executable for your system is
-then just a simple matter of running 'make'.
+Upon the initial cloning of the repository you will simply need to run
+'qmake' from the project directory itself. The qmake will parse the .pro
+file as well as the target system's build parameters to create a makefile
+that resolves all the includes and other system-specific details so building
+a binary/executable for your system is then just a simple matter of running
+'make'.
 
 There are a few different make targets to take note of, but we won't
 really be concerned with them except for making a "release-able" 
@@ -121,7 +130,7 @@ Windows .exe file (dynamically-linked against the non-debug libraries.
                       
    make debug     - builds and dynamically-links against the debug
                       versions of the Qt libraries
-                      (runs when you just type "make")
+                      (runs when you just type "make" by default)
                       
    make release   - builds and dynamically-links against normal
                       libraries that are suitable for distribution.
@@ -135,4 +144,3 @@ to work with the Qt framework's temp files on Windows and Linux, nothing is
 guaranteed to work quite right (is it ever?), so simply do a "make clean" 
 before committing, please. Thishis will save many a headache when it comes to
 compiling the source on a different environment. 
-

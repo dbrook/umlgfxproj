@@ -19,6 +19,7 @@
 
 #include "asset.hpp"   // Our new magical asset loading tool
 #include <QGLWidget>   // The OpenGL "canvas" of sorts
+#include <string>
 
 class QtLogo;
 // We'll use this for dummy test data for now
@@ -44,7 +45,6 @@ public:
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
-        // HIGLY recommend checking out SIGNALS & SLOTS in the README
         /*
          * These receiver slots will accept a new angle as an integer.
          * The slider widgets actually "emit" (send a SIGNAL) that is
@@ -60,9 +60,8 @@ public slots:
         void setXRotation( int angle );
         void setYRotation( int angle );
         void setZRotation( int angle );
-
-        void forward  ( void );
-        void backward ( void );
+        void forward  ( float amount );
+        void backward ( float amount );
         void strafeL  ( bool );
         void strafeR  ( bool );
         void incrElev ( bool );
@@ -97,6 +96,10 @@ public slots:
          */
         void p_Perspective( );
         void p_Orthographic( );
+
+        // Realigns the scene and viewing window frame parameters
+        // (helpful if you've zoomed off to nowheresville.
+        void masterReset( void );
         
 signals:
         /*
@@ -126,7 +129,6 @@ protected:
         // Function to load the textures (they will be "placed" by the asset handler)
         void loadGLTextures( void );
 
-
         // Mouse-button-was-pressed within the framebuffer (EVENT HANDLER)
         void mousePressEvent( QMouseEvent *event );
 
@@ -139,7 +141,6 @@ private:
          * these are kind of like the globals we had in the Angel exs.
          */
         QtLogo *logo;      // The logo object that will show on the screen
-
         Asset3ds *asset;   // Our new magic asset (must be a 3ds file)
 
         int xRot;          // X-Axis orientation value (DEGREES)
@@ -173,6 +174,7 @@ private:
         
         bool perspectiveMode;  // Are we in perspective mode? TRUE
                                // or orthographic mode? FALSE
+
         GLfloat ortho_left, ortho_right, ortho_top, ortho_bottom;
 };
 

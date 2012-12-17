@@ -42,6 +42,10 @@ protected:
         // Handles the pressing of keys and wheel motion in the scene
         void keyPressEvent( QKeyEvent *event );
         void keyReleaseEvent( QKeyEvent *event );
+
+        // This should probably have been in the GLWidget object, because
+        // now scrolling anywhere (not over a scroll-accepting widget) will
+        // automagically be captured by the GLWidget.
         void wheelEvent( QWheelEvent *event );
 
 private:
@@ -59,6 +63,7 @@ private:
         QPushButton *roomLightSwitch;
         QPushButton *auxiliarySwitch;
         QPushButton *oppositeSwitch;
+        QPushButton *masterReset;
         QSlider *redSlider, *grnSlider, *bluSlider, *alpSlider;
         QRadioButton *p_orth, *p_pers;
 };

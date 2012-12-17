@@ -121,6 +121,11 @@ Window::Window()
         // Make sure the perspective mode is checked
         p_pers->setChecked( true );
 
+        masterReset = new QPushButton( "Scene Reset" );
+        projLayout->addWidget( masterReset );
+        connect( masterReset, SIGNAL(clicked()),
+                 glWidget, SLOT(masterReset()) );
+
         /*
          * Now set up a group box for handling all the lighting needs
          */
@@ -265,6 +270,10 @@ void Window::keyPressEvent( QKeyEvent *e )
                 glWidget->strafeL( true );
         else if (e->key() == Qt::Key_D)
                 glWidget->strafeR( true );
+        else if (e->key() == Qt::Key_Plus)
+                glWidget->forward( 5.0 );
+        else if (e->key() == Qt::Key_Minus)
+                glWidget->backward( 5.0 );
 
         if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Q)
                 close();
@@ -296,7 +305,7 @@ void Window::wheelEvent( QWheelEvent *e )
         int steps = e->delta();
 
         if (steps < 0)
-                glWidget->forward();
+                glWidget->forward(0.2);
         else
-                glWidget->backward();
+                glWidget->backward(0.2);
 }

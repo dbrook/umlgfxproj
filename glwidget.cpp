@@ -15,8 +15,6 @@
  */
 
 #include <QtGui>      // Pull in the actual interface to the GUI elems
-#include <iostream>
-#include <cstdio>
 #include <math.h>     // As with any good OpenGL program, there's a 
                       // healthy amount of under-the-hood mathematics!
 
@@ -48,12 +46,15 @@ GLWidget::GLWidget( QWidget *parent ) :
         ///////////////////////////////////////
         // Attempt to load whatever asset
         ///////////////////////////////////////
-        asset = new Asset3ds("models/elecloco/Locomotive chs4 072.3DS");
+        QStringList args = QCoreApplication::arguments();
 
+        // Pure AWESOME cascading member function calls! WHeeeeeeeeee
+        char *assetName = args.at(1).toLocal8Bit().data();
 
-        std::cerr << "Loaded a new asset" << std::endl ;
+        asset = new Asset3ds(assetName);
 
         // Look dead-on at the scene to start (no initial rotations)
+        // WARNING: This is overruled by the slider settings in window.cpp!!
         setXRotation( 0 );
         setYRotation( 0 );
         setZRotation( 0 );
@@ -109,7 +110,7 @@ GLWidget::~GLWidget()
 }
 
 /*
- * At a minimum, we expect a 50 x 50 px size.
+ * At a minimum, we expect a 250 x 250 px size.
  */
 QSize GLWidget::minimumSizeHint() const
 {
@@ -173,30 +174,30 @@ void GLWidget::setZRotation( int angle )
         }
 }
 
-void GLWidget::forward  ( void )
+void GLWidget::forward  ( float amount )
 {
         if (!perspectiveMode) {
-                ortho_bottom += 0.2;
-                ortho_top    -= 0.2;
-                ortho_left   -= 0.2;
-                ortho_right  += 0.2;
+                ortho_bottom -= amount;
+                ortho_top    += amount;
+                ortho_left   += amount;
+                ortho_right  -= amount;
         } else {
-                zPos += 0.5;
+                zPos += amount;
         }
         // Evil way of forcing the redraw to happen
         resizeGL( this->width(), this->height() );
         updateGL();
 }
 
-void GLWidget::backward ( void )
+void GLWidget::backward ( float amount )
 {
         if (!perspectiveMode) {
-                ortho_bottom -= 0.2;
-                ortho_top    += 0.2;
-                ortho_left   += 0.2;
-                ortho_right  -= 0.2;
+                ortho_bottom += amount;
+                ortho_top    -= amount;
+                ortho_left   -= amount;
+                ortho_right  += amount;
         } else {
-                zPos -= 0.5;
+                zPos -= amount;
         }
         // Evil way of forcing the redraw to happen
         resizeGL( this->width(), this->height() );
@@ -228,18 +229,31 @@ void GLWidget::decrElev ( bool on )
  */
 void GLWidget::panHorizontal( int direction )
 {
-        if (direction < 0)       xPos -= 0.25;
-        else                     xPos += 0.25;
+        if (direction < 0)       xPos -= 1.0;
+        else                     xPos += 1.0;
         updateGL();
 }
 
 void GLWidget::panVertical( int direction )
 {
-        if (direction < 0)       yPos -= 0.25;
-        else                     yPos += 0.25;
+        if (direction < 0)       yPos -= 1.0;
+        else                     yPos += 1.0;
         updateGL();
 }
 
+void GLWidget::masterReset( void )
+{
+        xPos = yPos = 0.0;
+        zPos = -20.0;
+
+        ortho_bottom = ortho_right = 5.0;
+        ortho_top = ortho_left = -5.0;
+
+        xRot = yRot = zRot = 0.0;
+
+        resizeGL( this->width(), this->height() );
+        updateGL();
+}
 
 /*
  * Slots for manipulating the light source. This is a pretty straight
@@ -393,7 +407,8 @@ void GLWidget::initializeGL()
         //static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 7.0 };
 
         // Setup the room's light position. This will be a constant.
-        static GLfloat lightPosition[4] = { 0.0, 0.9, 0.5, 1.0 };
+        //static GLfloat lightPosition[4] = { 0.0, 0.9, 0.5, 1.0 };
+        static GLfloat lightPosition[4] = { 0.0, 0.0, 10.0, 1.0 };
         glLightfv( GL_LIGHT0, GL_POSITION, lightPosition );
 
         // Initialize the side lights
@@ -406,7 +421,6 @@ void GLWidget::initializeGL()
         // Create the vertex buffer array with the object!
         // NOTE: This fails unless you have the proper context first.
 
-        std::cerr << "Attempting to create the VBO!" << std::endl;
         asset->CreateVBO();
 
         // The texture loading interface is very wonky still and
@@ -469,12 +483,12 @@ void GLWidget::resizeGL( int width, int height )
          
         http://jleland.blogspot.com/2008/12/gluperspective-to-glfrustrumf.html
 
-        */
+         */
         GLfloat top, bottom, left, right;
-        GLfloat fov = 40, near = 0.1, far = 100.0;
+        GLfloat fov = 40, near = 0.1, far = 10000.0;
         
         if (perspectiveMode) {
-//                GLfloat aspect = (GLfloat) width / (GLfloat) height;
+//                GLfloat aspect = (GLfloat) height / (GLfloat) width;
                 // Always make aspect ratio 0 to avoid nasty looking resizes
                 GLfloat aspect = 1.0;
                 top = tan( toRadians( fov ) ) * near;
@@ -518,13 +532,8 @@ void GLWidget::loadGLTextures()
         glGenTextures( 1, asset->GetTexCoordVBO() );
         glBindTexture( GL_TEXTURE_2D, *(asset->GetTexCoordVBO()) );
 
-        printf( "%p\n", asset->GetTexCoordVBO() );
-
-        unsigned int p2 = *(asset->GetTexCoordVBO());
-        std::cout << "*(asset->GetTexCoordVBO()) = " << p2 << std::endl;
-
         glTexImage2D( GL_TEXTURE_2D, 0, 3, t.width(), t.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits() );
-        //glTexImage2D( GL_TEXTURE_2D, 0, 3, t.height(), t.width(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits() );
+//        glTexImage2D( GL_TEXTURE_2D, 0, 3, t.height(), t.width(), 0, GL_RGBA, GL_UNSIGNED_BYTE, t.bits() );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -539,13 +548,13 @@ void GLWidget::timerEvent( QTimerEvent *timer )
          * This area will control all possible directions of camera movement
          */
         if (moveUp_) {
-                panVertical(-1.0);
+                panVertical(-5.0);
         } else if (moveDn_) {
-                panVertical(1.0);
+                panVertical(5.0);
         } else if (moveLeft_) {
-                panHorizontal(1.0);
+                panHorizontal(5.0);
         } else if (moveRight_){
-                panHorizontal(-1.0);
+                panHorizontal(-5.0);
         }
 }
 
@@ -573,13 +582,11 @@ void GLWidget::mouseMoveEvent( QMouseEvent *event )
         if (event->buttons() & Qt::LeftButton) {
                 setXRotation( xRot + 8 * dy );
                 setYRotation( yRot + 8 * dx );
-//                panHorizontal( xPos + dx );
-//                panVertical( yPos + dy );
         }
-        /*else {
+        else {
                 setXRotation( xRot + 8 * dy );
                 setZRotation( zRot + 8 * dx );
-        }*/
+        }
 
         // Update lastPos with the new position so subsequent moves
         // will be handled based off of the present location.
