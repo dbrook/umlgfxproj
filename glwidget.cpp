@@ -14,6 +14,10 @@
  * other Qt-specific bindings for the widget itself.
  */
 
+// Texturing is very wonky, and calls / relevant code to texturing can
+// be disabled by setting this preprocessor directive to 0.
+#define TEXTURE_MODE_ON 0
+
 #include <QtGui>      // Pull in the actual interface to the GUI elems
 #include <math.h>     // As with any good OpenGL program, there's a 
                       // healthy amount of under-the-hood mathematics!
@@ -66,6 +70,9 @@ GLWidget::GLWidget( QWidget *parent ) :
         // some are ungodly huge and need to be visible at least in some
         // fashion right away, less the user thinks something failed.
         zPos = -20.0;
+
+        // Initialize scaling factor to 1, no scale change
+        scaleFactor = 1.0;
 
         // Initialize motion state bools
         moveUp_ = moveDn_ = moveRight_ = moveLeft_ = false;
@@ -122,7 +129,7 @@ QSize GLWidget::minimumSizeHint() const
  */
 QSize GLWidget::sizeHint() const
 {
-        return QSize( 450, 450 );
+        return QSize( 650, 650 );
 }
 
 /*
@@ -229,15 +236,15 @@ void GLWidget::decrElev ( bool on )
  */
 void GLWidget::panHorizontal( int direction )
 {
-        if (direction < 0)       xPos -= 1.0;
-        else                     xPos += 1.0;
+        if (direction < 0)       xPos -= 0.5;
+        else                     xPos += 0.5;
         updateGL();
 }
 
 void GLWidget::panVertical( int direction )
 {
-        if (direction < 0)       yPos -= 1.0;
-        else                     yPos += 1.0;
+        if (direction < 0)       yPos -= 0.5;
+        else                     yPos += 0.5;
         updateGL();
 }
 
@@ -274,7 +281,7 @@ void GLWidget::lightAmbientToggle( void )
                 // Light is off when called, so turn it back on
                 glEnable( GL_LIGHT0 );
 
-                qglClearColor( qtGray.light() );
+                qglClearColor( qtDark.light() );
                 ambientLight = true;
         }
         updateGL();                // Commit the change to the scene
@@ -374,6 +381,27 @@ void GLWidget::p_Orthographic( void )
 
 
 /*
+ * Change the scaling factor of the model.
+ * Sometimes models are too big (ugh, like the house one we tried).
+ * Pushing it back didn't really seem like an elegant solution, so
+ * this lets the user DIRECTLY set the scaling factor and force a
+ * redraw of the scene.
+ */
+void GLWidget::setScaling( double usrFactor )
+{
+        // Qt provides a double spin box. But we want a float! Bah!
+
+        scaleFactor = (float) usrFactor;
+
+        updateGL();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+//  Qt OpenGL Base Fundamental functions
+//////////////////////////////////////////////////////////////////////////////
+
+/*
  * These functions will closely mimic those which we've seen already
  * w.r.t. the GLUT functions. In fact, Qt actually implements GLUT,
  * so the coding is frighteningly similar.
@@ -382,7 +410,7 @@ void GLWidget::initializeGL()
 {
         // The background color is set here.
         //qglClearColor( qtPurple.dark() );
-        qglClearColor( qtGray.light() );
+        qglClearColor( qtDark.light() );
 
 /*
         // Make a QtLogo (this has been provided to us), (make it green!)
@@ -408,14 +436,14 @@ void GLWidget::initializeGL()
 
         // Setup the room's light position. This will be a constant.
         //static GLfloat lightPosition[4] = { 0.0, 0.9, 0.5, 1.0 };
-        static GLfloat lightPosition[4] = { 0.0, 0.0, 10.0, 1.0 };
+        static GLfloat lightPosition[4] = { 0.0, 0.0, 1000.0, 1.0 };
         glLightfv( GL_LIGHT0, GL_POSITION, lightPosition );
 
         // Initialize the side lights
-        static GLfloat flPos[4] = { 1.0, 0.0, 0.1, 0.0 };
+        static GLfloat flPos[4] = { 1000.0, 0.0, 0.1, 0.0 };
         glLightfv( GL_LIGHT1, GL_POSITION, flPos );
 
-        static GLfloat llPos[4] = { -1.0, 0.0, 0.1, 0.0 };
+        static GLfloat llPos[4] = { -1000.0, 0.0, 0.1, 0.0 };
         glLightfv( GL_LIGHT2, GL_POSITION, llPos );
 
         // Create the vertex buffer array with the object!
@@ -423,11 +451,13 @@ void GLWidget::initializeGL()
 
         asset->CreateVBO();
 
+#if TEXTURE_MODE_ON
         // The texture loading interface is very wonky still and
         // needs more debugging time. We've removed all calls and
         // interaction with the outside files that deal with them ... for now.
-//        loadGLTextures();
-//        glBindTexture(GL_TEXTURE_2D, *(asset->GetTexCoordVBO()));
+        loadGLTextures();
+        glBindTexture(GL_TEXTURE_2D, *(asset->GetTexCoordVBO()));
+#endif
 }
 
 // Basically the redraw call back from GLUT
@@ -441,6 +471,9 @@ void GLWidget::paintGL()
         glRotatef( yRot / 16.0, 0.0, 1.0, 0.0 );
         glRotatef( zRot / 16.0, 0.0, 0.0, 1.0 );
 
+        // Now we can scale the scene we load, in case it's huge/tiny.
+        glScalef( scaleFactor, scaleFactor, scaleFactor );
+
         glLightfv( GL_LIGHT1, GL_DIFFUSE, auxColor );
         glLightfv( GL_LIGHT2, GL_DIFFUSE, axxColor );
 
@@ -449,14 +482,16 @@ void GLWidget::paintGL()
         logo->draw();
  */
 
+#if TEXTURE_MODE_ON
         // This is where we'll put the textures on
-//        glEnable(GL_TEXTURE_2D);
-
+        glEnable(GL_TEXTURE_2D);
+#endif
         // Have the asset redraw!
         asset->Draw();
-
+#if TEXTURE_MODE_ON
         // Reset the texture state
-//        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
+#endif
 }
 
 /*

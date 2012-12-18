@@ -8,9 +8,41 @@ Members:
 	Austin Veino
 	Dan Scanlan
 	
-----------------------
- Project Introduction
-----------------------
+---------------------------
+ Quick Summary of Features
+---------------------------
+  * Load any 3DS file at runtime by giving a path to that object (argv[1])
+    For example:
+
+       ./finalproject models/Ackbar/Ackbar.3DS
+
+  * Control the distance of the model / scene from the viewport with the
+    scroll wheel, or for really large scenes like the house example, use 
+    + and - keys to increment that displacement at larger intervals. This
+    is designed to limit overall frustration (not only when testing!)
+
+  * Control the position/rotation of the model with left/right click-and-
+    drag, as well as move the field of view with W (up), S (down), A (left),
+    and D (right) so you can zoom into the more interesting parts of a scene.
+
+  * Change the scaling of the loaded model with the Scene Scaling Factor
+    spinbox. BUG: Unforunately right now, this impacts lighting somewhat,
+    scaling UP makes the object darker, and down makes it blindingly light.
+
+  * Choose either perspective (frustum) projection or orthographic so see
+    the stark difference between the two.
+
+  * Reset the scene to the as-initially-loaded state. We had discussed that
+    this was a nice thing to do for when you've been playing with a scene
+    long enough and want to get to a fresh state.
+
+  * Turn light sources on and off, as well as add/subtract colors from the 
+    left side and right side of the scene with slider widgets. 
+
+
+-------------------------------
+ Detailed Project Introduction
+-------------------------------
 This application will open any 3ds model and allow the user to pan around
 it, change colors, and toggle / mutate light sources that impact the object.
 The window that spawns at run-time is dominated (size-wise) with an OpenGL

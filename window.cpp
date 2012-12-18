@@ -126,6 +126,21 @@ Window::Window()
         connect( masterReset, SIGNAL(clicked()),
                  glWidget, SLOT(masterReset()) );
 
+        // Make a spinbox to control the scale matrix
+        QLabel *scalingLabel = new QLabel( "Scene Scaling Factor" );
+        projLayout->addWidget( scalingLabel );
+        modifyScale = new QDoubleSpinBox( projections );
+        projLayout->addWidget( modifyScale );
+
+        // Configure the spinbox. Needs some better defaults
+        modifyScale->setRange( 0.0, 100.0 );
+        modifyScale->setSingleStep( 0.05 );
+        modifyScale->setValue( 1.0 );
+
+        connect( modifyScale, SIGNAL(valueChanged(double)),
+                 glWidget, SLOT(setScaling(double)) );
+
+
         /*
          * Now set up a group box for handling all the lighting needs
          */
@@ -196,9 +211,9 @@ Window::Window()
          * There's also no error checking implemented in the sliders so
          * do NOT set them out of bounds in the unitSlider() helper function.
          */
-        xSlider->setValue( 30 * 16 );
-        ySlider->setValue( 345 * 16 );
-        zSlider->setValue( 345 * 16 );
+        xSlider->setValue( 0 * 16 );
+        ySlider->setValue( 0 * 16 );
+        zSlider->setValue( 0 * 16 );
         redSlider->setValue( 200 );
         grnSlider->setValue(  10 );
         bluSlider->setValue(  10 );
@@ -275,7 +290,7 @@ void Window::keyPressEvent( QKeyEvent *e )
         else if (e->key() == Qt::Key_Minus)
                 glWidget->backward( 5.0 );
 
-        if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Q)
+        if (e->key() == Qt::Key_Escape)
                 close();
         else
                 QWidget::keyPressEvent( e );

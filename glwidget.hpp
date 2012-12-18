@@ -101,6 +101,15 @@ public slots:
         // (helpful if you've zoomed off to nowheresville.
         void masterReset( void );
         
+        /*
+         * Change the scaling factor of the model.
+         * Sometimes models are too big (ugh, like the house one we tried).
+         * Pushing it back didn't really seem like an elegant solution, so
+         * this lets the user DIRECTLY set the scaling factor and force a
+         * redraw of the scene.
+         */
+        void setScaling( double usrFactor );
+        
 signals:
         /*
          * These signals get emitted so the GUI widgets can reflect
@@ -150,6 +159,10 @@ private:
         // For camera positions. May be deprecated in favor of a
         // QVector in the near/immediate future.
         GLfloat xPos, yPos, zPos;
+
+        // Scaling factor that will determine the size of the model loaded.
+        // (Need this to control the glScalef on the repaints!)
+        GLfloat scaleFactor;
 
         // State flags to determine if the scene needs moving
         bool moveUp_, moveDn_, moveRight_, moveLeft_;
